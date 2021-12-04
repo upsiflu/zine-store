@@ -1,27 +1,20 @@
-# Elm Firebase
+# Zine-Store
 
-A simple repository to show Elm integration with Firebase using ports. You can read more about it in my [short blog post introducing it](https://lengrand.fr/using-firebase-in-elm/).
+Implementing a firestore backend for the [zine, an app for creating and infinite collages of editable hypertext blocks](https://github.com/upsiflu/zine). In the long run, _this will be replaced by a p2p backend_ with a minimal discovery server.
 
-You can demo the app **[here](https://elm-firebase.netlify.com/)**.
+What this sandbox is made for:
 
-This demo runs on **[Elm 0.19](https://elm-lang.org)**.
+* Try out different CRDTs, and multi-avatar, multi-user cases in general
+* Evaluate and test Ui ideas in Elm
+* Showcase some of the ideas behing Zine
 
-## Getting started
 
-To run this app locally, you will need to :
+### Database and Auth
 
-- Set up your [Firebase Cloud Firestore](https://firebase.google.com/docs/firestore) to handle and receive users and messages.
-- Be able to run this repository
+Administer the `zine-store` project through the [Firebase console](https://console.firebase.google.com/?pli=1):
 
-### Setting up the Database and Auth
-
-- Go to the [Firebase console](https://console.firebase.google.com/?pli=1) and create a new project
-- Setup Google Signin in the Authentication part.
-
-![How to setup Google Sign-In](images/auth-setup.png)
-
-- Create a new Cloud Firestore in locked mode
-- Change the Firestore rules so that only logged requests can be written / read.
+- Change Auth providers
+- Change Rules. As of now, actions are stored individually, per-user:
 
 ```
 rules_version = '2';
@@ -34,48 +27,22 @@ service cloud.firestore {
 }
 ```
 
-Using those rules, each user will get its own space, with a messages store inside it. So this doubles down as database setup, and security.
+### Running a frontend test server
 
-That should be it! If needed, test your rules using the [Simulator](https://firebase.google.com/docs/firestore/security/get-started#testing_rules).
+- Clone this repo, then install the external deps: `npm install`.
+- Check the `.env` file in your root folder, which encodes the [Firebase config object](https://firebase.google.com/docs/web/setup#config-object).
+- Run the local test server: `npm start`.
 
-### Running the code
+The local server will act upon the same database as the public one, but will use the locally supplied frontend files in `src/`.
 
-To run the code, only a few steps are needed :).
+### Deploying the frontend
 
-- Clone the repo : `$ git clone git@github.com:jlengrand/elm-firebase.git`
-- Move in the repo : `$ cd elm-firebase`
-- Install necessary dependencies. The easiest way is probably to run `$ npm install`.
-- You will need to create a `.env` file in your root folder to let the app know about your Firestore project. The `.env` file looks like this :
-
-```
-ELM_APP_API_KEY="AIzaSyCjjxds-Qrk2Vsjj8qktPuzEgwerggeg"
-ELM_APP_AUTH_DOMAIN="test-elm-login-elererge.firebaseapp.com"
-ELM_APP_DATABASE_URL="https://test-elm-login-elererge.firebaseio.com"
-ELM_APP_PROJECT_ID="test-elm-login-elererge"
-ELM_APP_STORAGE_BUCKET=""
-ELM_APP_MESSAGING_SENDER_ID="916631954567"
-ELM_APP_APP_ID="1:916631954567:web:2a755b103fe23041"
-```
-
-The required information is the same as described in the [Firebase config object](https://firebase.google.com/docs/web/setup#config-object).
-The easiest way is to go to the settings page of your project, and scroll down until you see the javascript snippet. It will contain all the information needed.
-
-_Note : All the informationm in the .env file is not secret, and can be shared. In fact, it will be accessible to anyone using your app via the console. [This is not a problem](https://stackoverflow.com/questions/37482366/is-it-safe-to-expose-firebase-apikey-to-the-public)!_
-
-![Settings page of Firebase project](images/settings.png)
-
-- Run the app : `$ npm start`. You will be able to test the app at `http://localhost:3000`!
-
-### Deploying
-
-If for some reason you want to deploy the code somewhere, you can run `$ npm run build`. Now you simply have to serve the content of the `build` folder, and you're done!
-
-## Contributing
-
-Contributions are more than welcome ! You can [pick one of the issues of the list](https://github.com/jlengrand/elm-firebase/issues) or simply create your own :).
+* to the Google hosting service: `firebase deploy`.
+* to any other hosting server: run `npm run build`, then upload the `dist/` folder.
 
 ## Authors
 
+* [flupsi](https://flupsi.com) / [upsiflu on Github](https://github.com/upsiflu)
 * [Julien Lengrand-Lambert](https://twitter.com/jlengrand)
 
-Happy hacking!
+This is a fork from Julien's beautiful firestore+[Elm 0.19](https://elm-lang.org)+parcel [template](https://github.com/jlengrand/elm-firebase), as announced [here](https://lengrand.fr/using-firebase-in-elm/).

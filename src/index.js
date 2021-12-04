@@ -6,7 +6,7 @@ import { Elm } from "./Main.elm";
 import registerServiceWorker from "./registerServiceWorker";
 
 // Just checking envs are defined - Debug statement
-console.log(process.env.ELM_APP_API_KEY !== undefined);
+console.log(process.env.ELM_APP_API_KEY !== undefined ? "Environment initialized" : "Environment variables missing -- Host .env file");
 
 const firebaseConfig = {
   apiKey: process.env.ELM_APP_API_KEY,
@@ -29,7 +29,7 @@ const app = Elm.Main.init({
 });
 
 app.ports.signIn.subscribe(() => {
-  console.log("LogIn called");
+  console.log("Logging In");
   signInWithPopup(auth, provider)
     .then(result => {
       result.user.getIdToken().then(idToken => {
@@ -49,13 +49,13 @@ app.ports.signIn.subscribe(() => {
 });
 
 app.ports.signOut.subscribe(() => {
-  console.log("LogOut called");
+  console.log("Logging Out");
   signOut(auth);
 });
 
 //  Observer on user info
 onAuthStateChanged(auth, user => {
-  console.log("called");
+  console.log("User received:", user);
   if (user) {
     user
       .getIdToken()
@@ -86,6 +86,9 @@ onAuthStateChanged(auth, user => {
       app.ports.receiveMessages.send({
         messages: messages
       });
+    });
+  } else {
+    app.ports.receiveNull.send({
     });
   }
 });
