@@ -1,12 +1,14 @@
 port module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
-import Html exposing (Html, button, div, h1, h2, h3, h5, img, input, p, text, form, small)
-import Html.Attributes exposing (placeholder, src, value, id, disabled, type_)
+import Html exposing (Html, span, button, label, fieldset, input, div, h1, h2, h3, h5, img, p, text, form, small, summary, details)
+import Html.Attributes exposing (placeholder, src, class, value, id, disabled, type_, checked, for)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Json.Decode
 import Json.Decode.Pipeline
 import Json.Encode
+
+import Tile exposing (Tile(..), Instance(..))
 
 
 port signIn : () -> Cmd msg
@@ -52,12 +54,24 @@ type MayFail a e
     | Authenticated a
 
 type alias Model =
-    { userData : MayFail {user : UserData, messages : List String } ErrorData, inputContent : String}
+    { userData : MayFail {user : UserData, messages : List String } ErrorData
+    , inputContent : String
+    , mosaic : List Tile
+    }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { userData = Pending, inputContent = ""}, Cmd.none )
+    let
+        initialTile = Tile Square 
+        initialPosition = {x = 100, y = 100, scalePercentage =100}
+    in 
+    ( { userData = Pending
+      , inputContent = ""
+      , mosaic = [initialTile initialPosition]
+      }
+      , Cmd.none 
+    )
 
 
 
@@ -180,54 +194,76 @@ messageListDecoder =
 
 ---- VIEW ----
 
+disclose : List (Html Msg) -> List (Html Msg) -> Html Msg
+disclose a b =
+    (summary [] a) :: b
+        |> details []
+        
+
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ img [ src "/logo.svg" ] []
-        , h1 [] [ text "zine-store" ]
-        , div [ id "loader"] []
-        
-        -- User log in/out
-        , div [id "user"]
-            <| ( case model.userData of
-                    Null ->
-                        [ button [ onClick LogIn ] [ text "Log In" ] ]
+    let
+        optionsDisclosure =
+            disclose 
+                [span [class "material-icons"] [text "settings"]]
+                [fieldset [class "chrome"]
+                    [ input [type_ "checkbox", id "natural", checked True] []
+                    , label [class "chrome", for "natural"] [text "My trackpad is configured for natural scrolling"]
+                    ]
+                ]
+        userDisclosure =
+            case model.userData of
+                Null ->
+                    button [ onClick LogIn ] [ text "Log In..." ]
 
-                    Authenticated {user} ->
-                        [ button [ onClick LogOut ] [ text "Log Out" ]
-                        , h5 [] [ text user.email ]
-                        , small [] [ text user.uid ]
+                Authenticated {user} ->
+                    disclose
+                        [ span [class "chrome"] [text user.email], button [ onClick LogOut ] [ text "Log Out" ] ]
+                        [ small [] [ text user.uid ]
                         , small [] [ text user.token ]
                         ]
 
-                    Failed error ->
+                Failed error ->
+                    disclose
+                        [ text <| errorPrinter error ]
                         [ button [ onClick LogIn ] [ text "Log In" ]
-                        , small [] [ text <| errorPrinter error ]]
-
-
-                    Pending ->
-                        [ button [ disabled True ] [ text "Checking..." ] ]
-            )
-
-        , case model.userData of
-            Authenticated {messages} ->
-                div []
-                    [ form [onSubmit SaveMessage]
-                        [ input [ placeholder "Message to save", value model.inputContent, onInput InputChanged, id "send-message" ] []
-                        , button [ type_ "submit" ] [ text "Save new message" ]
+                        , small [] [ text <| errorPrinter error ]
                         ]
-                    , div []
-                        [ h3 [] [ text "Previous messages" ]
-                        , div [] <|
-                            List.map
-                                (\m -> p [] [ text m ]) messages
-                        ]
+
+
+                Pending ->
+                    button [ disabled True ] [ text "Contacting the Server..." ]
+
+        chrome =
+            div [ class "chrome-bar" ]
+                [ div [class "top chrome"]
+                    [ h1 [] [ text "zine-store -- 2-fingure gestures" ] 
+                    , optionsDisclosure
+                    , userDisclosure
                     ]
+                , div [class "bottom chrome"]
+                    [ case model.userData of
+                        Authenticated {messages} ->
+                            div []
+                                [ form [onSubmit SaveMessage]
+                                    [ input [ placeholder "Message to save", value model.inputContent, onInput InputChanged, id "send-message" ] []
+                                    , button [ type_ "submit" ] [ text "Persist on the Server" ]
+                                    ]
+                                , div []
+                                    <| List.map (\m -> p [] [ text m ]) messages
+                                    
+                                ]
 
-            _ ->
-                div [] []
-        ]
+                        _ ->
+                            div [] []
+                    ]
+                ]
+        mosaic =
+            model.mosaic
+            |> List.map Tile.view
+            |> div [class "mosaic"]
+    in div [] [mosaic, chrome]
 
 
 
