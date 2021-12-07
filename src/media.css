@@ -1,0 +1,11 @@
+/* 
+*   Respond to media other than screen 
+*/
+
+
+/* Display URL of hyperlinks when printing */
+@media print {
+  a:after {
+    content: " (" attr(href) ")";
+  }
+}

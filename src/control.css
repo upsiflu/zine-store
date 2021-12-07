@@ -1,0 +1,114 @@
+:root {
+    --form-control-color: transparent;
+    --icon-size: 18px;
+    --typographic-icon-size: calc(var(--leading) * 1.2);
+    --typographic-icon-indent: 0px;
+    --minimal-diameter: 44px;
+    --minimal-radius: calc(var(--minimal-diameter) / 2);
+    --negative-radius: calc(0px - var(--minimal-diameter) / 2);
+}
+
+input {
+    position: relative;
+}
+
+input::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    right: 50%;
+    margin-left: max(-50%, var(--minimal-negative-radius));
+    margin-top: max(-50%, var(--minimal-negative-radius));
+    width: min(100%, var(--minimal-diameter));
+    height: min(100%, var(--minimal-diameter));
+    border-radius: var(--minimal-radius);
+    background: yellowgreen;
+}
+
+input[type="checkbox"]:focus {
+    outline: min(var(--h-spacing), var(--v-spacing)) dashed var(--rubric);
+    outline-offset: min(1px, 0.05em);
+}
+
+input[type="checkbox"].multiconfig {
+    --form-control-color: var(--rubric);
+    position: relative;
+    left: var(--typographic-icon-indent);
+    --icon-size: calc(var(--typographic-icon-size) + var(--h-spacing));
+    border-radius: 50%;
+    margin: 0 calc(var(--h-spacing) / 2);
+    border-color: var(--form-control-color);
+    border-width: 0px;
+}
+
+input[type="checkbox"].multiconfig,
+input[type="checkbox"].multiconfig+label {
+    cursor: pointer;
+}
+
+input[type="checkbox"].multiconfig::before {
+    content: "";
+    border-radius: 50%;
+}
+
+input[type="checkbox"].multiconfig+label {
+    margin-left: calc(0rem - var(--typographic-icon-size) - var(--h-spacing));
+    display: inline-block;
+    transform: translateY(calc(0rem - var(--h-spacing) / 2));
+    position: relative;
+    color: white;
+    font-size: var(--icon-size);
+    transition: color .4s;
+    --icon-size: var(--typographic-icon-size);
+}
+
+.pivot {
+    margin-top: calc(0 - var(--leading) - var(--typographic-icon-size));
+    margin-top: -60px;
+}
+
+.pivot+input[type="checkbox"] {
+    margin-left: calc(100% - var(--typographic-icon-size) - var(--h-spacing))
+}
+
+input[type="checkbox"]:not(:checked)+label {
+    color: var(--rubric) !important;
+    transition: color 0s;
+}
+
+input[type="checkbox"]::before {
+    font-family: 'Material Icons';
+    font-size: var(--icon-size);
+    display: block;
+    content: "check";
+    width: 100%;
+    height: 100%;
+    transform: scale(0);
+    transition: 120ms transform ease-in-out;
+    box-shadow: inset 1em 1em var(--form-control-color);
+    line-height: calc(var(--alternate-font-scale));
+    text-indent: calc(0px - var(--line-thickness));
+}
+
+input[type="checkbox"]:checked::before {
+    transform: scale(1);
+}
+
+input[type="checkbox"] {
+    overflow: hidden;
+    appearance: none;
+    /* For iOS < 15 to remove gradient background */
+    background-color: transparent;
+    /* Not removed via appearance */
+    margin: 0;
+    font: inherit;
+    color: currentColor;
+    width: var(--icon-size);
+    height: var(--icon-size);
+    border: var(--line-thickness) solid currentColor;
+    box-sizing: border-box;
+}
+
+label>span {
+    transform: translateY(calc(var(--line-thickness) / 2));
+}

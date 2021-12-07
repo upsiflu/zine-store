@@ -1,0 +1,27 @@
+/* 
+* Chrome Style indicates direct manipulation associated with objects. 
+* May define its own highlight color, employ inversion, or adhere to the system-supplied highlight color. 
+* May employ extravagant features such as skeumorphic beveled edges, or double-exposure and light effects 
+* when used on a dark background (e.g. a H.U.D.) 
+*/
+
+:root {
+    --h-spacing: 8px;
+    --v-spacing: 2px;
+    --line-thickness: 2px;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital@0;1&family=Fira+Sans:ital,wght@0,400;0,800;1,400&display=swap');
+.chrome {
+    font-family: 'Fira Sans', sans-serif;
+    font-size: var(--alternate-font-scale);
+    min-height: calc(var(--v-spacing) + var(--icon-size));
+    padding: calc(var(--v-spacing) / 2) calc(var(--h-spacing) / 2);
+}
+
+.chrome.form-control {
+    display: grid;
+    grid-template-columns: var(--icon-size) auto;
+    gap: var(--h-spacing);
+    align-items: center;
+}

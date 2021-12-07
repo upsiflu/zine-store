@@ -1,0 +1,147 @@
+/* Optimize: embed this font into the HTML in byte encoding: */
+
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital@0;1&display=swap');
+
+/* Variables
+   ========================================================================== */
+
+:root {
+    /* horizontal */
+    --measure: 28rem;
+    --ch: calc(1rem / 2);
+    --indent: calc(var(--measure) / 12);
+    /* vertical */
+    --leading: 1.25rem;
+    --en: calc(1rem / 2);
+    --alternate-font-scale: .75em;
+    /* color */
+    --rubric: rgb(255, 80, 90);
+}
+
+
+/* Fonts
+   ========================================================================== */
+
+
+/**
+ * 1. A viewport always fits at least 28rem.
+ * 2. On large viewports, the rems grow with the viewport width, but only at half pace.
+ * 3. Boldprint is implemented with the alternate font (Fira Sans Bold).
+ */
+
+html {
+    font-family: 'EB Garamond', serif;
+    line-height: var(--leading);
+}
+
+.typographic {
+    line-height: var(--leading);
+}
+
+@media screen and (max-width: 448px) {
+    html {
+        font-size: calc(100vw / 28);
+    }
+}
+
+@media screen and (min-width: 896px) {
+    html {
+        font-size: calc(50vw / 56 + 8px);
+    }
+}
+
+b,
+strong {
+    font-family: 'Fira Sans', sans-serif;
+    font-weight: 800;
+    font-size: var(--alternate-font-scale);
+}
+
+
+/* Horizontal Rhythm
+   ========================================================================== */
+
+ol,
+ul {
+    padding-left: var(--indent);
+}
+
+
+/* Vertical Rhythm
+   ========================================================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: normal;
+    margin: var(--leading) -0.1em;
+    line-height: 1em;
+}
+
+h1 {
+    font-size: calc(var(--leading) * 3);
+    padding: calc(var(--leading) * 0.5) 0;
+}
+
+h2 {
+    font-size: calc(var(--leading) * 2);
+    padding: calc(var(--leading) * 0.5) 0;
+}
+
+h3 {
+    font-size: calc(var(--leading) * 2);
+    margin-bottom: 0;
+}
+
+h4 {
+    font-size: calc(var(--leading));
+    margin-bottom: 0
+}
+
+p,
+section.typographic,
+ul.typographic,
+ol.typographic {
+    margin: var(--leading) 0
+}
+
+main.typographic {
+    padding: var(--leading) var(--en);
+    border: 1px dotted mediumaquamarine;
+    box-sizing: border-box;
+}
+
+section.typographic,
+main.typographic {
+    position: relative;
+    /* accepts absolute child node positioning */
+}
+
+::marker {
+    display: none !important;
+    position: absolute !important;
+    top: 0 !important;
+    color: var(--rubric);
+}
+
+li {
+    margin-bottom: -2px;
+}
+
+
+/* Readability
+   ========================================================================== */
+
+
+/**
+ * 1.
+ * 2.
+ */
+
+p,
+.typographic {
+    max-width: var(--measure);
+}

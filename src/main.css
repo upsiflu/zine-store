@@ -8,3 +8,25 @@ small, h5 {
 }
 
 small {text-overflow:ellipsis; display:block; border-bottom: 1px solid silver; padding-bottom: .5rem;}
+
+
+/* Mosaic */
+.mosaic {
+  position:absolute; top:0; left:0;
+}
+
+.top.chrome h1 {position:absolute; pointer-events: none; opacity:.2;}
+
+.chrome-bar {position:fixed; opacity:.9; left:0; width:100vw; height:100vh;}
+
+.chrome-bar .top, .chrome-bar .bottom {
+  position:absolute; width:100%;display:flex; 
+  background:silver;
+  border:2px outset rgb(216, 216, 216);outline:1px solid black;
+}
+.chrome-bar .top {top:0;display:flex;justify-content: space-between;}
+.chrome-bar .bottom {bottom:0;}
+
+details, summary {max-width:100%;}
+summary {float:right;}
+fieldset {display: flex;}
