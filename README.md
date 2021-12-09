@@ -26,16 +26,23 @@ Administer the `zine-store` project through the [Firebase console](https://conso
 - Change Auth providers
 - Change Rules
 
+**Features:**
+
+- [ ] Implement a very minimalistic CRDT 
+
 
 ### Moving and Scaling Tiles
 
+**Features:**
+
 - [x] Implement a basic tile (square)
 - [ ] Pointer layer to sense device-specific gestures
-- - [x] Pinch on a touchpad
+  - [x] Pinch on a touchpad
+- [ ] Persist tile movement in the CRDT
 - [ ] Wrap gestures in a custom element to limit the hitTarget 
 
 
-## Running a frontend test server
+## Run a frontend test server
 
 - Clone this repo, then install the external deps: `npm install`.
 - Check the `.env` file in your root folder, which encodes the [Firebase config object](https://firebase.google.com/docs/web/setup#config-object).
@@ -43,17 +50,29 @@ Administer the `zine-store` project through the [Firebase console](https://conso
 
 The local server will act upon the same database as the public one, but will use the locally supplied frontend files in `src/`.
 
-### Deploying the frontend
+- Deploy the frontend
+  - to the Google hosting service: `firebase deploy`.
+  - to any other hosting server: run `npm run build`, then upload the `dist/` folder.
 
-* to the Google hosting service: `firebase deploy`.
-* to any other hosting server: run `npm run build`, then upload the `dist/` folder.
+## Modules
+
+![Elm Modules Diagram](documentation/modules.svg)
+
+- Gesture and Actor are singleton modules that communicate with [the infinitely vast Web Platform](https://developer.mozilla.org/en-US/docs/Web/API) either through ports (JSON exchange hubs between the world of Elm and the global JS context) or, preferably, through [custom elements](https://dev.to/leojpod/writing-custom-elements-for-elm-3agj), which are DOM nodes with their own tiny encapsulated[^1] JS app. 
+
+Gesture
+: Captures and abstracts platform-specific Pointer events:
+: [ ] 2-finger pinch and scroll
+: [ ] Drag and Drop
+: [ ] ESC
+
+[^1]: While both approaches do have the same power, custom elements capture events (messages coming from JS) at a specific DOM node instead of the global level, which helps keeping the `update` functions quite local and encapsulated.
 
 ## Authors
 
 * [flupsi](https://flupsi.com) / [upsiflu on Github](https://github.com/upsiflu)
-* [Julien Lengrand-Lambert](https://twitter.com/jlengrand)
 
-This is a fork from Julien's beautiful firestore+[Elm 0.19](https://elm-lang.org)+parcel [template](https://github.com/jlengrand/elm-firebase), as announced [here](https://lengrand.fr/using-firebase-in-elm/).
+This is a fork from [Julien Lengrand-Lambert](https://twitter.com/jlengrand)'s beautiful firestore+[Elm 0.19](https://elm-lang.org)+parcel [template](https://github.com/jlengrand/elm-firebase), as [announced here](https://lengrand.fr/using-firebase-in-elm/).
 
 
 
