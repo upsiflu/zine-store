@@ -8,7 +8,7 @@
    version="1.1"
    id="svg5"
    inkscape:version="1.2-dev (9ee32be, 2021-06-19)"
-   sodipodi:docname="modules.svg"
+   sodipodi:docname="modules-overview.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -23,9 +23,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="0.8458248"
-     inkscape:cx="478.23143"
-     inkscape:cy="373.59983"
+     inkscape:zoom="0.85748301"
+     inkscape:cx="403.50654"
+     inkscape:cy="398.84172"
      inkscape:window-width="1440"
      inkscape:window-height="872"
      inkscape:window-x="0"
@@ -83,7 +83,7 @@
      id="layer1"
      transform="translate(-5.0378746,-3.5552701)">
     <rect
-       style="fill:#f7f7f7;fill-opacity:1;stroke:#b3b3b3;stroke-width:0.331999;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill;stop-color:#000000"
+       style="fill:#ffffff;fill-opacity:1;stroke:#b3b3b3;stroke-width:0.331999;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill;stop-color:#000000"
        id="rect3342"
        width="45.104866"
        height="28.583725"
@@ -110,7 +110,7 @@
        rx="1.5875001"
        ry="1.5875" />
     <rect
-       style="fill:#f7f7f7;fill-opacity:1;stroke:#999999;stroke-width:1.05833333;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.5;paint-order:markers stroke fill;stop-color:#000000"
+       style="fill:#ffffff;fill-opacity:1;stroke:#999999;stroke-width:1.05833333;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.5;paint-order:markers stroke fill;stop-color:#000000"
        id="rect122041"
        width="64.265884"
        height="106.38188"
@@ -136,13 +136,8 @@
        y="75.474449"
        rx="1.5875"
        ry="1.5875" />
-    <path
-       style="fill:none;stroke:#808080;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker214375)"
-       d="m 202.69827,117.80142 c -19.78903,-0.57587 -18.44709,5.53878 0.11202,5.02583"
-       id="path4177"
-       sodipodi:nodetypes="cc" />
     <rect
-       style="fill:#f7f7f7;fill-opacity:1;stroke:#999999;stroke-width:1.05834;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.5;paint-order:markers stroke fill;stop-color:#000000"
+       style="fill:#ffffff;fill-opacity:1;stroke:#999999;stroke-width:1.05834;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.5;paint-order:markers stroke fill;stop-color:#000000"
        id="rect122047"
        width="64.265884"
        height="28.505041"
@@ -447,7 +442,7 @@
          style="stroke-width:0.264583"
          x="150.28979"
          y="167.99635"
-         id="tspan2540">Transform...</tspan></text>
+         id="tspan135467">Transform Delta</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:2.64583px;line-height:1.25;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Normal';font-variant-ligatures:no-common-ligatures discretionary-ligatures no-contextual;stroke-width:0.264583"
@@ -721,10 +716,5 @@
         </g>
       </g>
     </g>
-    <path
-       style="fill:none;stroke:#808080;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker214375)"
-       d="m 202.69827,100.52899 c -19.78903,-1.313373 -16.57023,9.52766 0.11202,9.34563"
-       id="path4411"
-       sodipodi:nodetypes="cc" />
   </g>
 </svg>

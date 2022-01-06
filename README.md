@@ -1,7 +1,5 @@
 # Zine-Store
 
-_Check [the most recently deployed demo here](https://zine-store.web.app/)! If it's out of date, [deploy yourself](#deploying-the-frontend)_
-
 **Scope: Implementing a provisory firestore backend to prototype the [zine, an app for creating and infinite collages of editable hypertext blocks](https://github.com/upsiflu/zine).** In the long run, _the firestore will be replaced by a p2p backend_. Check [nextgraph](http://nextgraph.org/) and [P2PKB](https://drive.allmende.io/code/#/3/code/view/0082f96ab016f40545f0ed9dd31169e6/) for an emerging solution from TG, Nico and Jon.
 
 What this sandbox is made for:
@@ -10,6 +8,11 @@ What this sandbox is made for:
 * Evaluate and test Ui ideas in Elm
 * Showcase some of the ideas behing Zine
 
+
+_Check [the most recently deployed demo here](https://zine-store.web.app/)! If it's out of date, [deploy yourself](#deploying-the-frontend)_
+
+_For a sneak peek into the look-and-feel, check out [these UX mockups](https://flupsi.uber.space/UiGlossary.pdf#page=13)._
+
 ## Features
 
 - [x] [Authenticate and persist](#database-and-auth) 
@@ -17,6 +20,7 @@ What this sandbox is made for:
 - [ ] Editable Hypertext Tile
 - [ ] Lasso Tile
 - [ ] Scrolling and Zooming
+- [ ] Adherence to [a design system](#gui)
 
 
 ### Database and Auth
@@ -40,6 +44,10 @@ Administer the `zine-store` project through the [Firebase console](https://conso
   - [x] Pinch on a touchpad
 - [ ] Persist tile movement in the CRDT
 - [ ] Wrap gestures in a custom element to limit the hitTarget 
+
+### Gui
+
+Check my [Glossary](https://flupsi.uber.space/UiGlossary.pdf) for a discussion of Gui elements. 
 
 
 ## Run a frontend test server
@@ -109,8 +117,7 @@ Gesture and Actor are singleton modules that communicate with [the infinitely va
   - [ ] Avatar
         : an animal that follows the viewport of the associated actor. If multiple actors are associated to one avatar, it will become a 'team avatar', split into several animals.
         - can summon new tiles, cause transformations, pick up and drop tiles, and cut/copy/paste them. In order to do so, they need to be moved right over the tile to affect.
-
-
+n
 [^1]: While both approaches do have the same power, custom elements capture events (messages coming from JS) at a specific DOM node instead of the global level, which helps keeping the `update` functions quite local and encapsulated.
 [^2]: Each user has a uid, and their actions have an `ordinal`, so any `uid`×`ordinal` adresses a unique action. In the provisory store implementation, firebase auto-generates the `uid`s as 'documents'.
 [^3]: When an action is not the first ever action, the user triggering it has observed some action right before it. So it can be assumed that the new action is intended to follow this `contextual` action.

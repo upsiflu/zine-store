@@ -55,8 +55,8 @@ app.ports.signOut.subscribe(() => {
 
 //  Observer on user info
 onAuthStateChanged(auth, user => {
-  console.log("User received:", user);
   if (user) {
+    console.log("User received:", user);
     user
       .getIdToken()
       .then(idToken => {
@@ -114,26 +114,43 @@ var tx = 0;
 var ty = 0;
 var scale = 1;
 
+var timeout = null;
+
+var consolidateDelta = e => {
+	timeout = null;
+  var myDelta ={
+    x: tx,
+    y: ty,
+    scalePercentage: Math.round(scale*100)
+  }
+
+  console.log("consolidate delta", myDelta);
+
+  tx = 0;
+  ty = 0;
+  scale = 1;
+
+
+  box.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+  app.ports.receiveDelta.send(myDelta);
+}
 document.addEventListener('wheel', event => {
 	event.preventDefault();
+
+	if (timeout) clearTimeout(timeout);
+  timeout = setTimeout(consolidateDelta, 50);
   
-	if (event.ctrlKey)
-	{
+	if (event.ctrlKey) {
     var s = Math.exp(-event.deltaY/100);
     scale *= s;
-  }
-	
-	else
-	{
+  } else {
     var direction = natural.checked ? -1 : 1;
     tx += event.deltaX * direction;
     ty += event.deltaY * direction;
   }
-	
+
   box.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
-}, {
-	passive: false
-});
+}, { passive: false });
 
 
 var lastGestureX = 0;

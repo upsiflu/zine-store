@@ -19,6 +19,10 @@
     padding: calc(var(--v-spacing) / 2) calc(var(--h-spacing) / 2);
 }
 
+.chrome .chrome {
+    font-size: 1em;
+}
+
 .chrome.form-control {
     display: grid;
     grid-template-columns: var(--icon-size) auto;

@@ -7,7 +7,7 @@ small, h5 {
   font-family: "Fira Sans", Arial, Helvetica, sans-serif;
 }
 
-small {text-overflow:ellipsis; display:block; border-bottom: 1px solid silver; padding-bottom: .5rem;}
+small {text-overflow:ellipsis; overflow:hidden; display:block; border-bottom: 1px solid silver; padding-bottom: .5rem;}
 
 
 /* Mosaic */
@@ -22,11 +22,23 @@ small {text-overflow:ellipsis; display:block; border-bottom: 1px solid silver; p
 .chrome-bar .top, .chrome-bar .bottom {
   position:absolute; width:100%;display:flex; 
   background:silver;
-  border:2px outset rgb(216, 216, 216);outline:1px solid black;
+  border:2px outset #ddd;outline:1px solid black;
 }
 .chrome-bar .top {top:0;display:flex;justify-content: space-between;}
 .chrome-bar .bottom {bottom:0;}
 
 details, summary {max-width:100%;}
-summary {float:right;}
-fieldset {display: flex;}
+.popup {position:fixed; left:0; width:100vw; padding: .2rem 1rem; padding-bottom: .5rem;background:silver;
+box-shadow: 4px 4px rgba(0,0,0,.4);
+  border:2px outset #ddd;outline:1px solid rgba(0,0,0,.2);border-bottom-width:1px;border-top-width: 1px;}
+fieldset {display: flex; min-width:1rem;}
+fieldset input:not([type="checkbox"]) {flex-grow:2;}
+fieldset.chrome {padding-top:5px;}
+
+.load-placeholder {
+  display:block;
+  text-align: center;
+  padding: 2rem;
+  background:grey;
+  border-radius: 2px;
+}

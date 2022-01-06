@@ -4,8 +4,20 @@ var tx = 0;
 var ty = 0;
 var scale = 1;
 
+var isGesturing = false;
+var timeout;
+
+var consolidateGesture = e => {
+	isGesturing = false;
+	timeout = null;
+}
+
+
 document.addEventListener('wheel', event => {
 	event.preventDefault();
+
+	isGesturing = true;
+	if (!timeout) timeout = setTimeout(consolidateGesture, 300);
   
 	if (event.ctrlKey)
 	{

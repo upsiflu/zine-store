@@ -1,35 +1,27 @@
 port module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
-import Html exposing (Html, span, button, label, fieldset, input, div, h1, h2, h3, h5, img, p, text, form, small, summary, details)
+import RemoteData exposing (RemoteData(..))
+import Html exposing (Html, span, button, label, fieldset, legend, input, div, h1, h2, h3, h5, img, p, text, form, small, summary, details)
 import Html.Attributes exposing (placeholder, src, class, value, id, disabled, type_, checked, for)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Json.Decode
 import Json.Decode.Pipeline
 import Json.Encode
 
-import Tile exposing (Tile(..), Instance(..))
+import User exposing (User)
+import Tile exposing (Tile(..))
 
 
 port signIn : () -> Cmd msg
-
-
-port receiveNull : (Json.Encode.Value -> msg) -> Sub msg
-
-
-port signInInfo : (Json.Encode.Value -> msg) -> Sub msg
-
-
-port signInError : (Json.Encode.Value -> msg) -> Sub msg
-
-
 port signOut : () -> Cmd msg
-
-
 port saveMessage : Json.Encode.Value -> Cmd msg
 
-
 port receiveMessages : (Json.Encode.Value -> msg) -> Sub msg
+port signInInfo : (Json.Encode.Value -> msg) -> Sub msg
+port signInError : (Json.Encode.Value -> msg) -> Sub msg
+port receiveNull : (Json.Encode.Value -> msg) -> Sub msg
+port receiveDelta : (Json.Encode.Value -> msg) -> Sub msg
 
 
 
@@ -40,21 +32,12 @@ type alias MessageContent =
     { uid : String, content : String }
 
 
-type alias ErrorData =
-    { code : Maybe String, message : Maybe String, credential : Maybe String }
+type alias Delta =
+    {x : Int, y:Int, scalePercentage:Int}
 
-
-type alias UserData =
-    { token : String, email : String, uid : String }
-
-type MayFail a e
-    = Pending
-    | Null
-    | Failed e
-    | Authenticated a
 
 type alias Model =
-    { userData : MayFail {user : UserData, messages : List String } ErrorData
+    { user : RemoteData User User.Error
     , inputContent : String
     , mosaic : List Tile
     }
@@ -63,10 +46,10 @@ type alias Model =
 init : ( Model, Cmd Msg )
 init =
     let
-        initialTile = Tile Square 
+        initialTile = Tile Tile.Square >> Tile.reposition {x = 200, y=500, scalePercentage=200}
         initialPosition = {x = 100, y = 100, scalePercentage =100}
     in 
-    ( { userData = Pending
+    ( { userData = Loading
       , inputContent = ""
       , mosaic = [initialTile initialPosition]
       }
@@ -81,17 +64,31 @@ init =
 type Msg
     = LogIn
     | LogOut
-    | LoggedInData (Result Json.Decode.Error UserData)
-    | LoggedInError (Result Json.Decode.Error ErrorData)
+    | LoggedInData (Result Json.Decode.Error User)
+    | LoggedInError (Result Json.Decode.Error User.Error)
     | SaveMessage
     | InputChanged String
-    | MessagesReceived (Result Json.Decode.Error (List String))
+    | ActionsReceived (Result Json.Decode.Error (List String))
     | NullReceived
+    | DeltaReceived (Result Json.Decode.Error Delta)
 
 
-emptyError : ErrorData
-emptyError =
-    { code = Nothing, credential = Nothing, message = Nothing }
+
+syncAction : Action -> Model -> Model
+syncAction action model =
+    case model.userData of
+        Authenticated data ->
+            case action of
+                ChatMessage message ->
+                    if (data.messages == Nothing) data.messages = [message]
+                    else 
+
+            model { userData = Authenticated {data | messages }}
+
+
+type Action
+    = Action ActionId User.Action
+
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -101,34 +98,34 @@ update msg model =
             ( model, signIn () )
 
         LogOut ->
-            ( { model | userData = Pending}, signOut () )
+            ( { model | user = NotAsked }, signOut () )
 
         LoggedInData result ->
             case result of
-                Ok value ->
-                    ( { model | userData = Authenticated {user = value, messages = []} }, Cmd.none )
+                Ok user ->
+                    ( { model | user = Success user }, Cmd.none )
 
                 Err error ->
-                    ( { model | userData = Failed <| messageToError <| Json.Decode.errorToString error }, Cmd.none )
+                    ( { model | user = Failure <| messageToError <| Json.Decode.errorToString error }, Cmd.none )
 
         LoggedInError result ->
             case result of
-                Ok value ->
-                    ( { model | userData = Failed <| value }, Cmd.none )
+                Ok usererror ->
+                    ( { model | user = Failure <| value }, Cmd.none )
 
                 Err error ->
-                    ( { model | userData = Failed <| messageToError <| Json.Decode.errorToString error }, Cmd.none )
+                    ( { model | user = Failure <| messageToError <| Json.Decode.errorToString error }, Cmd.none )
 
         SaveMessage ->
-            ( model, saveMessage <| messageEncoder model )
+            ( model, messageEncoder model |> saveMessage )
 
         InputChanged value ->
             ( { model | inputContent = value }, Cmd.none )
 
         MessagesReceived result ->
-            case (model.userData, result) of
-                (Authenticated user, Ok value) ->
-                    ( { model | userData = Authenticated {user | messages = value} }, Cmd.none )
+            case result of
+                Ok value ->
+                    { model | messages =  }, Cmd.none )
 
                 (_, Err error) ->
                     ( { model | userData = Failed <| messageToError <| Json.Decode.errorToString error }, Cmd.none )
@@ -138,6 +135,15 @@ update msg model =
 
         NullReceived ->
             ( { model | userData = Null }, Cmd.none )
+
+        DeltaReceived result ->
+            case (result, model.mosaic) of
+                (Ok delta, [tile]) -> 
+                    ( { model | mosaic = [Tile.reposition delta tile] }, Cmd.none )
+                (Err error, _) ->
+                    ( { model | userData = Failed <| messageToError <| Json.Decode.errorToString error }, Cmd.none )
+                _ -> 
+                    (model, Cmd.none )
 
 
 messageEncoder : Model -> Json.Encode.Value
@@ -180,6 +186,12 @@ logInErrorDecoder =
         |> Json.Decode.Pipeline.required "message" (Json.Decode.nullable Json.Decode.string)
         |> Json.Decode.Pipeline.required "credential" (Json.Decode.nullable Json.Decode.string)
 
+deltaDecoder : Json.Decode.Decoder Delta
+deltaDecoder =
+    Json.Decode.succeed Delta
+        |> Json.Decode.Pipeline.required "x" Json.Decode.int
+        |> Json.Decode.Pipeline.required "y" Json.Decode.int
+        |> Json.Decode.Pipeline.required "scalePercentage" Json.Decode.int
 
 messagesDecoder =
     Json.Decode.decodeString (Json.Decode.list Json.Decode.string)
@@ -196,8 +208,7 @@ messageListDecoder =
 
 disclose : List (Html Msg) -> List (Html Msg) -> Html Msg
 disclose a b =
-    (summary [] a) :: b
-        |> details []
+    details [] [ summary [] a, div [class "popup"] b ]
         
 
 
@@ -206,7 +217,7 @@ view model =
     let
         optionsDisclosure =
             disclose 
-                [span [class "material-icons"] [text "settings"]]
+                [span [class "chrome"] [text "Input device"]]
                 [fieldset [class "chrome"]
                     [ input [type_ "checkbox", id "natural", checked True] []
                     , label [class "chrome", for "natural"] [text "My trackpad is configured for natural scrolling"]
@@ -220,8 +231,8 @@ view model =
                 Authenticated {user} ->
                     disclose
                         [ span [class "chrome"] [text user.email], button [ onClick LogOut ] [ text "Log Out" ] ]
-                        [ small [] [ text user.uid ]
-                        , small [] [ text user.token ]
+                        [ fieldset [class "chrome"] [ legend [] [text "Uid"], small [] [ text user.uid ]]
+                        , fieldset [class "chrome"] [ legend [] [text "Token"], small [] [ text user.token ]]
                         ]
 
                 Failed error ->
@@ -238,7 +249,7 @@ view model =
         chrome =
             div [ class "chrome-bar" ]
                 [ div [class "top chrome"]
-                    [ h1 [] [ text "zine-store -- 2-fingure gestures" ] 
+                    [ h1 [] [ text "zine-store -- 2-fingure gestures. If you have a touchpad, try pinching and scrolling!" ] 
                     , optionsDisclosure
                     , userDisclosure
                     ]
@@ -247,11 +258,21 @@ view model =
                         Authenticated {messages} ->
                             div []
                                 [ form [onSubmit SaveMessage]
-                                    [ input [ placeholder "Message to save", value model.inputContent, onInput InputChanged, id "send-message" ] []
-                                    , button [ type_ "submit" ] [ text "Persist on the Server" ]
+                                    [ fieldset [class "chrome"]
+                                        [ legend [] [text "Messages"]
+                                        , input [ placeholder "Write a Message", class "chrome", value model.inputContent, onInput InputChanged, id "send-message" ] []
+                                        , button [ type_ "submit", class "chrome" ] [ text "Persist on the Server" ]
                                     ]
-                                , div []
-                                    <| List.map (\m -> p [] [ text m ]) messages
+                                    , fieldset [class "chrome"]
+                                    [
+                                        div []
+                                            <| case messages of
+                                                Nothing -> 
+                                                    [span [class "load-placeholder"] [text "Loading Messages..."]]
+                                                Just mm ->
+                                                    List.map (\m -> p [] [ text m ]) mm
+                                        ]
+                                    ]
                                     
                                 ]
 
@@ -277,6 +298,7 @@ subscriptions model =
         , signInError (Json.Decode.decodeValue logInErrorDecoder >> LoggedInError)
         , receiveMessages (Json.Decode.decodeValue messageListDecoder >> MessagesReceived)
         , receiveNull (Json.Decode.decodeValue (Json.Decode.succeed {}) >> always NullReceived)
+        , receiveDelta (Json.Decode.decodeValue deltaDecoder >> DeltaReceived)
         ]
 
 
