@@ -71,9 +71,9 @@ onAuthStateChanged(auth, user => {
         console.log(error);
       });
 
-    // Set up listened on new messages
-    const q = query(collection(db, `users/${user.uid}/messages`));
-    onSnapshot(q, querySnapshot => {
+    // Set up listener on new notes
+    const messageQuery = query(collection(db, `users/${user.uid}/messages`));
+    onSnapshot(messageQuery, querySnapshot => {
       console.log("Received new snapshot");
       const messages = [];
 
@@ -88,18 +88,17 @@ onAuthStateChanged(auth, user => {
       });
     });
   } else {
-    app.ports.receiveNull.send({
-    });
+    console.log("User is nullish:", user);
+    app.ports.receiveNull.send({});
   }
 });
 
-app.ports.saveMessage.subscribe(data => {
+app.ports.saveNote.subscribe(data => {
   console.log(`saving message to database : ${data.content}`);
-
-  addDoc(collection(db, `users/${data.uid}/messages`), {
+  addDoc(collection(db, `users/${data.uid}/notes`), {
     content: data.content
   }).catch(error => {
-      app.ports.signInError.send({
+      app.ports.noteError.send({
         code: error.code,
         message: error.message
       });
