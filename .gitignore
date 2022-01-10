@@ -1,6 +1,9 @@
 # Distribution
 build
 
+# Hosting/Deployment cache
+.firebase
+
 # elm-package generated files
 elm-stuff
 

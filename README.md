@@ -2,16 +2,27 @@
 
 **Scope: Implementing a provisory firestore backend to prototype the [zine, an app for creating and infinite collages of editable hypertext blocks](https://github.com/upsiflu/zine).** In the long run, _the firestore will be replaced by a p2p backend_. Check [nextgraph](http://nextgraph.org/) and [P2PKB](https://drive.allmende.io/code/#/3/code/view/0082f96ab016f40545f0ed9dd31169e6/) for an emerging solution from TG, Nico and Jon.
 
-What this sandbox is made for:
+<section style="background:rgba(0,180,160,.3); padding: 1.5rem 1em; margin: 2rem -1em;">
 
-* Try out different CRDTs, and multi-avatar, multi-user cases in general
-* Evaluate and test Ui ideas in Elm
-* Showcase some of the ideas behing Zine
+**What this sandbox is made for:**
+
+Try out **CRDT**s and multi-avatar, multi-user cases
+: `zine` is part of a larger p2p infrastructure project
+
+Maintain a modular, **composable codebase** for later uses
+: Elm modules and [custom-elements](https://guide.elm-lang.org/interop/custom_elements.html) are to be as orthogonal as possible and expose nice and coherent APIs
+
+Evaluate and test **delightful Ui patterns** in Elm
+: [Flupsi's Ui Glossary](https://flupsi.uber.space/UiGlossary.pdf#page=13) goes into the best practices, tenets, patterns and their implications, and is intended to base the Gui ontology and [API design](#gui)
+
+**Ground conversations** around virtual collage-making
+: this experiment is indebted to cyberfeminist theory and practices of [co-thinking and figuration](https://library.oapen.org/bitstream/handle/20.500.12657/49652/9783839457658.pdf?sequence=1&isAllowed=y#page=230)
+</section>
 
 
-_Check [the most recently deployed demo here](https://zine-store.web.app/)! If it's out of date, [deploy yourself](#deploying-the-frontend)_
+_Check [the most recently deployed demo here](https://zine-store.web.app/)! If it's out of date, [deploy yourself](#deploying-the-frontend). For a sneak peek into the intended look-and-feel, check out [these Ui mockups](https://flupsi.uber.space/UiGlossary.pdf#page=13)._
 
-_For a sneak peek into the look-and-feel, check out [these UX mockups](https://flupsi.uber.space/UiGlossary.pdf#page=13)._
+------
 
 ## Features
 
@@ -25,14 +36,21 @@ _For a sneak peek into the look-and-feel, check out [these UX mockups](https://f
 
 ### Database and Auth
 
-Administer the `zine-store` project through the [Firebase console](https://console.firebase.google.com/?pli=1):
-
-- Change Auth providers
-- Change Rules
+- [x] Administer the `zine-store` project through the [Firebase console](https://console.firebase.google.com/?pli=1):
+  - Change Auth providers
+  - Change Rules
 
 **Features:**
 
-- [ ] Implement a very minimalistic CRDT 
+- [x] Optionally connect to the database through a `User`
+: by means of a custom element `remote-user` with:
+: **Events:**
+  - onAuthChanged `{ token, email, uid }`
+  - onNoteAdded `List String`
+: **Attributes:**
+  - logIn
+  - addNote `String`
+  - logOut
 
 
 ### Moving and Scaling Tiles
@@ -47,8 +65,9 @@ Administer the `zine-store` project through the [Firebase console](https://conso
 
 ### Gui
 
-Check my [Glossary](https://flupsi.uber.space/UiGlossary.pdf) for a discussion of Gui elements. 
+Check my [Glossary](https://flupsi.uber.space/UiGlossary.pdf) for a discussion of Gui elements. It aspires to exhaust the relevant bits of contemporary user interface culture, and to isolate patterns so they can base a functional, typed Gui library that would be one tier more abstract than a layout library such as elm-ui.
 
+------
 
 ## Run a frontend test server
 
@@ -56,11 +75,13 @@ Check my [Glossary](https://flupsi.uber.space/UiGlossary.pdf) for a discussion o
 - Check the `.env` file in your root folder, which encodes the [Firebase config object](https://firebase.google.com/docs/web/setup#config-object).
 - Run the local test server: `npm start`.
 
-The local server will act upon the same database as the public one, but will use the locally supplied frontend files in `src/`.
+The local server will act upon the same database as the public one, but will use the locally supplied frontend files in `src/`. You can read the docs on port 8000 by [installing `elm-doc-preview`](https://github.com/dmy/elm-doc-preview) and running `edp`.
 
-- Deploy the frontend
-  - to the Google hosting service: `firebase deploy`.
-  - to any other hosting server: run `npm run build`, then upload the `dist/` folder.
+Deploy the frontend
+: - to the Google hosting service: `firebase deploy`.
+- to any other hosting server: run `npm run build`, then upload the `dist/` folder.
+
+------ 
 
 ## Modules and their features
 
@@ -70,12 +91,12 @@ Gesture and Actor are singleton modules that communicate with [the infinitely va
 
 - Gesture
 : captures and abstracts platform-specific Pointer events.
-  - [ ] 2-finger pinch and scroll
+  - [x] 2-finger pinch and scroll
   - [ ] Drag and Drop
   - [ ] Cancel (such as ESC or Tab-blur)
 - Actor
 : abstracts the User and their history of actions.
-  - [ ] Authentification via 
+  - [x] Authentification via 
     - [x] Google
     - [ ] GitHub
     - [ ] E-Mail+Password
@@ -84,8 +105,9 @@ Gesture and Actor are singleton modules that communicate with [the infinitely va
     - [ ] Before a new state is calculated, the history can be simplified
     - Do we want to generate relative or absolute state, i.e. does a history result in a mosaic, or does a history, given an existing mosaic, generate the difference to an intended mosaic?
 - Mosaic
-: keeps a subset of all tiles, each positioned and otherwise transformed, and also manages scrolling and zooming the viewport, and forwarding transformations:
+: _keeps a subset of all tiles, each positioned and otherwise transformed, and also manages scrolling and zooming the viewport, and forwarding transformations:_
   - [ ] scroll and zoom the viewport
+        : 
   - [ ] activate
         : which tile(s) a future transformation will affect
   - _'activation' can be a function of the avatar's activity, and then avatars would be able to pick up and drop tiles wherever they go. This would make the whole app less miro/office-y and more game-like, immersive, laborious, and would give virtual distances more visceral effect!_
@@ -99,13 +121,15 @@ Gesture and Actor are singleton modules that communicate with [the infinitely va
         - [ ] position (of its geometric center)
         - [ ] rotation (around 3 axes!)
         - [ ] [overlay mode](https://developer.mozilla.org/en-US/docs/Web/CSS/mix-blend-mode)
-          - occlude ("normal")
-          - illuminate ("screen")
-          - tint ("multiply")
-        - white balance and gamma?
+          1. occlude ("normal")
+          2. illuminate ("screen")
+          3. tint ("multiply")
+        * white balance and gamma?
+        - clipping and alpha mattes?
         - polynomial or grid transformation ("goo")?
   - [ ] cut, copy, paste
-  - group and ungroup?
+     : 
+  - [ ] group and ungroup? 
 - Tile
 : atomic object that can be part of a `Mosaic`. A `Tile` has a uid and is either:
   - [ ] Hypertext
@@ -117,19 +141,24 @@ Gesture and Actor are singleton modules that communicate with [the infinitely va
   - [ ] Avatar
         : an animal that follows the viewport of the associated actor. If multiple actors are associated to one avatar, it will become a 'team avatar', split into several animals.
         - can summon new tiles, cause transformations, pick up and drop tiles, and cut/copy/paste them. In order to do so, they need to be moved right over the tile to affect.
-n
+
 [^1]: While both approaches do have the same power, custom elements capture events (messages coming from JS) at a specific DOM node instead of the global level, which helps keeping the `update` functions quite local and encapsulated.
 [^2]: Each user has a uid, and their actions have an `ordinal`, so any `uid`×`ordinal` adresses a unique action. In the provisory store implementation, firebase auto-generates the `uid`s as 'documents'.
+_Note to self:_ This should align better with automerge.
 [^3]: When an action is not the first ever action, the user triggering it has observed some action right before it. So it can be assumed that the new action is intended to follow this `contextual` action.
+
+-------
 
 ## Authors
 
 * [flupsi](https://flupsi.com) / [upsiflu on Github](https://github.com/upsiflu)
 
-This is a fork from [Julien Lengrand-Lambert](https://twitter.com/jlengrand)'s beautiful firestore+[Elm 0.19](https://elm-lang.org)+parcel [template](https://github.com/jlengrand/elm-firebase), as [announced here](https://lengrand.fr/using-firebase-in-elm/).
+* This is a fork from [Julien Lengrand-Lambert](https://twitter.com/jlengrand)'s beautiful firestore+[Elm 0.19](https://elm-lang.org)+parcel [template](https://github.com/jlengrand/elm-firebase), as [announced here](https://lengrand.fr/using-firebase-in-elm/).
+
+* `zine` is a collaboration with [Jon](https://github.com/almereyda) since fall 2021. Currently we are working in the frame of [nextgraph](team.nextgraph.org).
 
 
 
 -------
 
-Have a lot of fun 💖
+<section style="text-align:center; background:rgba(128,128,128,.3); padding: 7rem 0; margin: -2rem 0;">💖 Have a lot of fun 💖</section>

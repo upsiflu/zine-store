@@ -6,6 +6,7 @@
     "test": "tests"
   },
   "dependencies": {
+    "automerge": "^1.0.1-preview.6",
     "firebase": "^9.6.0",
     "firebaseui": "^6.0.0"
   },

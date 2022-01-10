@@ -1,0 +1,10 @@
+{
+    "name": "upsiflu/zine-store",
+    "summary": "Collaborative Collage App (exploration)",
+    "version": "0.0.0",
+    "exposed-modules": [
+        "Main",
+        "User",
+        "Tile"
+    ]
+}
