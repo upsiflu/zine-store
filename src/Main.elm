@@ -1,71 +1,83 @@
-port module Main exposing (Model, Msg(..), init, main, update, view)
+module Main exposing
+    ( Model, init
+    , Msg(..), update
+    , view
+    , main
+    )
+
+{-| Collaborative collage editor (exploration)
+
+@docs Model, init
+@docs Msg, update
+@docs view
+@docs main
+
+-}
 
 import Browser
-import RemoteData exposing (RemoteData(..))
-import Html exposing (Html, span, button, label, fieldset, legend, input, div, h1, h2, h3, h5, img, p, text, form, small, summary, details)
-import Html.Attributes exposing (placeholder, src, class, value, id, disabled, type_, checked, for)
+import Gui
+import Html exposing (Html, button, details, div, fieldset, form, h1, h2, h3, h5, img, input, label, legend, p, small, span, summary, text)
+import Html.Attributes exposing (checked, class, disabled, for, id, placeholder, src, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Json.Decode
 import Json.Decode.Pipeline
 import Json.Encode
-
-import User exposing (User)
+import RemoteData exposing (RemoteData(..))
 import Tile exposing (Tile(..))
+import User exposing (User)
 
 
-{-| Collaborative collage editor (exploration)
+
+{-
+   ---- Outgoing
+   port signIn : () -> Cmd msg
+   port signOut : () -> Cmd msg
+   port saveNote : Json.Encode.Value -> Cmd msg
+
+
+   ---- Incoming
+   port receiveNote : (Json.Encode.Value -> msg) -> Sub msg
+   port noteError : (Json.Encode.Value -> msg) -> Sub msg
+
+   port signInSuccess : (Json.Encode.Value -> msg) -> Sub msg
+   port signInError : (Json.Encode.Value -> msg) -> Sub msg
+   port receiveNull : (Json.Encode.Value -> msg) -> Sub msg
+   port receiveDelta : (Json.Encode.Value -> msg) -> Sub msg
 -}
-
----- Outgoing
-port signIn : () -> Cmd msg
-port signOut : () -> Cmd msg
-port saveNote : Json.Encode.Value -> Cmd msg
-
-
----- Incoming
-port receiveNote : (Json.Encode.Value -> msg) -> Sub msg
-port noteError : (Json.Encode.Value -> msg) -> Sub msg
-
-port signInSuccess : (Json.Encode.Value -> msg) -> Sub msg
-port signInError : (Json.Encode.Value -> msg) -> Sub msg
-port receiveNull : (Json.Encode.Value -> msg) -> Sub msg
-port receiveDelta : (Json.Encode.Value -> msg) -> Sub msg
-
-
-
 ---- MODEL ----
 
 
 {-| relative transformation of a tile
 -}
 type alias Delta =
-    {x : Int, y:Int, scalePercentage:Int}
+    { x : Int, y : Int, scalePercentage : Int }
 
 
-{-| the zine app model
--}
+{-| -}
 type alias Model =
-    { user : RemoteData User User.Error
+    { user : User
     , tile : Tile
     }
 
-{-|
--}
+
+{-| -}
 init : ( Model, Cmd Msg )
 init =
     let
-        initialTile = Tile Tile.Square >> Tile.reposition {x = 200, y=500, scalePercentage=200}
-        initialPosition = {x = 100, y = 100, scalePercentage =100}
-    in 
-    ( { user = NotAsked
-      , mosaic = initialTile initialPosition
+        initialTile =
+            Tile Tile.Square >> Tile.reposition { x = 200, y = 500, scalePercentage = 200 }
+
+        initialPosition =
+            { x = 100, y = 100, scalePercentage = 100 }
+    in
+    ( { user = User.init
+      , tile = initialTile initialPosition
       }
-      , Cmd.none 
+    , Cmd.none
     )
 
 
-{-|
--}
+{-| -}
 deltaDecoder : Json.Decode.Decoder Delta
 deltaDecoder =
     Json.Decode.succeed Delta
@@ -74,97 +86,89 @@ deltaDecoder =
         |> Json.Decode.Pipeline.required "scalePercentage" Json.Decode.int
 
 
-messageEncoder : Model -> Json.Encode.Value
-messageEncoder model =
-    Json.Encode.object
-        [ ( "content", Json.Encode.string model.inputContent )
-        , ( "uid"
-          , case model.userData of
-                Authenticated {user} ->
-                    Json.Encode.string user.uid
 
-                _ ->
-                    Json.Encode.null
-          )
-        ]
+{-
+   messageEncoder : Model -> Json.Encode.Value
+   messageEncoder model =
+       Json.Encode.object
+           [ ( "content", Json.Encode.string model.inputContent )
+           , ( "uid"
+             , case model.userData of
+                   Authenticated {user} ->
+                       Json.Encode.string user.uid
 
-
+                   _ ->
+                       Json.Encode.null
+             )
+           ]
+-}
 ---- UPDATE ----
 
-{-|
--}
+
+{-| -}
 type Msg
-    = LogIn
-    | LogOut
-    | UserMessage User.Msg
-    | SaveNote String
-    | NullReceived
+    = UserMessage User.Msg
+    | TileMessage Tile.Msg
     | DeltaReceived (Result Json.Decode.Error Delta)
 
-{-|
--}
+
+{-| -}
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        LogIn ->
-            ( model, signIn () )
+        UserMessage message ->
+            ( { model | user = User.update message model.user }, Cmd.none )
 
-        SaveNote note ->
-            ( model, saveNote note )
-
-        LogOut ->
-            ( { model | user = NotAsked }, signOut () )
-
-        UserMessage msg ->
-            ( { model | user = RemoteData.map (User.update msg) model.user }, Cmd.none )
-
-        TileMessage msg ->
-            ( { model | tile = Tile.update msg model.tile }, Cmd.none )
-
-        NullReceived ->
-            ( { model | userData = NotAsked }, Cmd.none )
+        TileMessage message ->
+            ( { model | tile = Tile.update message model.tile }, Cmd.none )
 
         DeltaReceived result ->
             case result of
-                Ok delta -> 
+                Ok delta ->
                     ( { model | tile = Tile.reposition delta model.tile }, Cmd.none )
+
                 Err decodeError ->
                     ( model, Cmd.none )
 
 
+
 ---- View ----
 
-{-|
--}
+
+{-| -}
 view : Model -> Html Msg
 view model =
     let
-        userGui = User.view model.user |> Gui.map UserMessage
-        tileGui = Tile.view model.tile |> Gui.map TileMessage
+        userGui =
+            User.view model.user |> Gui.map UserMessage
+
+        tileGui =
+            Tile.view model.tile |> Gui.map TileMessage
     in
-    (Gui.compose >> Gui.view )
-        userGui
-        tileGui
+    userGui
+        |> Gui.with tileGui
+        |> Gui.view
 
 
 
 ---- PROGRAM ----
 
-{-|
+
+{-| [ signInSuccess (Json.Decode.decodeValue userDataDecoder >> User.LoggedInData >> UserMessage)
+, signInError (Json.Decode.decodeValue logInErrorDecoder >> User.LoggedInError >> UserMessage)
+, receiveMessages (Json.Decode.decodeValue notesDecoder >> User.NotesReceived >> UserMessage)
+, receiveMessagesError (Json.Decode.decodeValue notesErrorDecoder >> User.NotesErrorReceived >> UserMessage)
+, receiveNull (Json.Decode.decodeValue (Json.Decode.succeed {}) >> always NullReceived)
+, receiveDelta (Json.Decode.decodeValue deltaDecoder >> DeltaReceived)
+]
 -}
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ signInSuccess (Json.Decode.decodeValue userDataDecoder >> User.LoggedInData >> UserMessage)
-        , signInError (Json.Decode.decodeValue logInErrorDecoder >> User.LoggedInError >> UserMessage)
-        , receiveMessages (Json.Decode.decodeValue notesDecoder >> User.NotesReceived >> UserMessage)
-        , receiveMessagesError (Json.Decode.decodeValue notesErrorDecoder >> User.NotesErrorReceived >> UserMessage)
-        , receiveNull (Json.Decode.decodeValue (Json.Decode.succeed {}) >> always NullReceived)
-        , receiveDelta (Json.Decode.decodeValue deltaDecoder >> DeltaReceived)
-        ]
+        []
 
-{-|
--}
+
+{-| -}
 main : Program () Model Msg
 main =
     Browser.element

@@ -28,6 +28,19 @@ const app = Elm.Main.init({
   node: document.getElementById("root")
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
+// ATTRIBUTES
 app.ports.signIn.subscribe(() => {
   console.log("Logging In");
   signInWithPopup(auth, provider)
@@ -53,7 +66,21 @@ app.ports.signOut.subscribe(() => {
   signOut(auth);
 });
 
-//  Observer on user info
+
+app.ports.saveNote.subscribe(data => {
+  console.log(`saving message to database : ${data.content}`);
+  addDoc(collection(db, `users/${data.uid}/notes`), {
+    content: data.content
+  }).catch(error => {
+      app.ports.noteError.send({
+        code: error.code,
+        message: error.message
+      });
+    });
+});
+
+// EVENTS
+// Observer on user info
 onAuthStateChanged(auth, user => {
   if (user) {
     console.log("User received:", user);
@@ -93,17 +120,6 @@ onAuthStateChanged(auth, user => {
   }
 });
 
-app.ports.saveNote.subscribe(data => {
-  console.log(`saving message to database : ${data.content}`);
-  addDoc(collection(db, `users/${data.uid}/notes`), {
-    content: data.content
-  }).catch(error => {
-      app.ports.noteError.send({
-        code: error.code,
-        message: error.message
-      });
-    });
-});
 
 
 /** GESTURE port! */
