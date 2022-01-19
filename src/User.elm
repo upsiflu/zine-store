@@ -50,7 +50,7 @@ module User exposing
 import Gui exposing (Gui)
 import Html exposing (Html, button, details, div, fieldset, form, h1, h2, h3, h5, img, input, label, legend, p, small, span, summary, text)
 import Html.Attributes as Attributes exposing (checked, class, disabled, for, id, placeholder, src, type_, value)
-import Html.Events exposing (onClick, onInput, onSubmit)
+import Html.Events as Events exposing (onClick, onInput, onSubmit)
 import Html.Extra as Html exposing (nothing)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Field as Field
@@ -67,14 +67,6 @@ import RemoteData exposing (RemoteData(..))
 type User
     = User LocalUserData (RemoteData Error RemoteUserData)
 
-
-{-| `User` with no notes and an empty string note input field
--}
-init : User
-init =
-    User { notes = Nothing, input = "" } NotAsked
-
-
 type Error
     = DecodingError String
     | DatabaseError DatabaseErrorData
@@ -89,7 +81,7 @@ localUserDataDecoder =
         \notes ->
             Field.require "input" Decode.string <|
                 \input ->
-                    Decode.succeed { notes = notes, input = input }
+                    Decode.succeed (Ok { notes = notes, input = input })
 
 
 type alias RemoteUserData =
@@ -97,11 +89,11 @@ type alias RemoteUserData =
 
 
 remoteUserDataDecoder =
-    Field.attempt "token" Decode.string <|
+    Field.requireAt ["detail", "token"] Decode.string <|
         \token ->
-            Field.attempt "email" Decode.string <|
+            Field.requireAt ["detail",  "email"] Decode.string <|
                 \email ->
-                    Field.attempt "uid" Decode.string <|
+                    Field.requireAt ["detail",  "uid"] Decode.string <|
                         \uid ->
                             Decode.succeed { token = token, email = email, uid = uid }
 
@@ -110,6 +102,7 @@ type alias DatabaseErrorData =
     { code : Maybe String, credential : Maybe String, message : Maybe String }
 
 
+databaseErrorDataDecoder : Decoder DatabaseErrorData
 databaseErrorDataDecoder =
     Field.attempt "code" Decode.string <|
         \code ->
@@ -119,6 +112,14 @@ databaseErrorDataDecoder =
                         \credential ->
                             Decode.succeed { code = code, message = message, credential = credential }
 
+
+
+
+{-| `User` with no notes and an empty string note input field
+-}
+init : User
+init =
+    User { notes = Nothing, input = "" } NotAsked
 
 
 ---- UPDATE ----
@@ -173,13 +174,16 @@ update msg user =
                 }
                 remote
 
-        ( LoggedInData decodingResult, User local _ ) ->
-            case decodingResult of
+        ( LoggedInData remoteUserDataResult, User local _ ) ->
+            case remoteUserDataResult of
                 Ok remote ->
-                    User local (Success remote)
+                    User local ( Success remote )
 
                 Err decodingError ->
-                    (DecodingError >> RemoteData.Failure >> User local) (Decode.errorToString decodingError)
+                    Decode.errorToString decodingError 
+                        |> DecodingError 
+                        |> RemoteData.Failure 
+                        |> User local
 
         ( NotesReceived decodingResult, User local remote ) ->
             case decodingResult of
@@ -217,29 +221,30 @@ update msg user =
 view : User -> Gui Msg
 view (User local remote) =
     let
+        {-propagate key shape message decoder =
+            requiredAt [ "detail", key ] decoder (Decode.succeed shape)
+                |> Decode.map (\result -> Event (message result) False False)
+                |> Events.on key-}
+                
         viewLogInHandle =
             [ button [ onClick (Send LogIn) ] [ text "Log In..." ] ]
 
-        viewStatus : String -> List (Html msg) -> List (Html msg) -> Html msg
+        viewStatus : String -> List (Html Msg) -> List (Html Msg) -> Html Msg
         viewStatus command controls more =
             let
-                recentNote =
-                    (case local.notes of
-                        Just (n :: ns) ->
-                            n
-
-                        _ ->
-                            ""
-                    )
-                        |> Encode.string
-                        |> Attributes.property "recent-note"
-
                 attributes =
-                    command
-                        |> Encode.string
-                        |> Attributes.property "command"
-                        |> List.singleton
-                        |> (::) recentNote
+                    [ Attributes.attribute "command" command
+                    , Attributes.attribute "recent-note"
+                        <| case local.notes of
+                            Just (n :: ns) ->
+                                n
+
+                            _ ->
+                                ""
+                        
+                    , Events.on "signInInfo"
+                        <| Decode.map (Decode.decodeValue remoteUserDataDecoder >> LoggedInData) Decode.value 
+                    ]
             in
             Html.node "remote-user" attributes []
                 :: controls
