@@ -5,22 +5,6 @@ import { query, getFirestore, collection, addDoc, onSnapshot } from "firebase/fi
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * syncs a firebase user
  **/
@@ -31,9 +15,10 @@ export class RemoteUser extends HTMLElement {
   auth;
   db;
 
-
-
   // Attributes come from Elm
+  /* See `attributeChangedCallback` for the different commands.
+   * `recent-note`: add a note to the stack.
+   */
   static get observedAttributes() {
     return ['command', 'recent-note'];
   }
@@ -75,15 +60,13 @@ export class RemoteUser extends HTMLElement {
         user
           .getIdToken()
           .then(idToken => {
-            this.dispatchEvent(new CustomEvent(
-              "signInInfo",
-              {
-                detail: {
-                  token: idToken,
-                  email: user.email,
-                  uid: user.uid
-                }
+            this.dispatchEvent(new CustomEvent("signInInfo", {
+              detail: {
+                token: idToken,
+                email: user.email,
+                uid: user.uid
               }
+            }
             ))
           })
           .catch(error => {
@@ -102,15 +85,16 @@ export class RemoteUser extends HTMLElement {
               messages.push(doc.data().content);
             }
           });
-          /*
-          app.ports.receiveMessages.send({
-            messages: messages
-          });
-          */
+          this.dispatchEvent(new CustomEvent("notes", {
+            detail: {
+              notes: messages
+            }
+          }
+          ))
         });
       } else {
         console.log("User is nullish:", user);
-        //app.ports.receiveNull.send({});
+        this.dispatchEvent(new CustomEvent("null"))
       }
     });
 
@@ -171,12 +155,7 @@ export class RemoteUser extends HTMLElement {
         'DecodingError': () => { console.log("Decoding error") }
       })[newValue]();
     }
-
-
-
   }
-
-
 }
 customElements.define('remote-user', RemoteUser);
 

@@ -1,6 +1,7 @@
 import { Elm } from "./Main.elm";
 import registerServiceWorker from "./registerServiceWorker";
 import { } from './remote-user'
+import { } from './client-gestures'
 
 const app = Elm.Main.init({
   node: document.getElementById("root")
@@ -8,85 +9,6 @@ const app = Elm.Main.init({
 
 
 
-
-
-/** GESTURE port! */
-/* https://jsbin.com/cebiwiwesu/edit?js,output */
-
-var tx = 0;
-var ty = 0;
-var scale = 1;
-
-var timeout = null;
-
-var consolidateDelta = e => {
-  timeout = null;
-  var myDelta = {
-    x: tx,
-    y: ty,
-    scalePercentage: Math.round(scale * 100)
-  }
-
-  console.log("consolidate delta", myDelta);
-
-  tx = 0;
-  ty = 0;
-  scale = 1;
-
-
-  box.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
-  app.ports.receiveDelta.send(myDelta);
-}
-document.addEventListener('wheel', event => {
-  event.preventDefault();
-
-  if (timeout) clearTimeout(timeout);
-  timeout = setTimeout(consolidateDelta, 50);
-
-  if (event.ctrlKey) {
-    var s = Math.exp(-event.deltaY / 100);
-    scale *= s;
-  } else {
-    var direction = natural.checked ? -1 : 1;
-    tx += event.deltaX * direction;
-    ty += event.deltaY * direction;
-  }
-
-  box.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
-}, { passive: false });
-
-
-var lastGestureX = 0;
-var lastGestureY = 0;
-var lastGestureScale = 1.0;
-function onGesture(event) {
-  event.preventDefault();
-
-  if (event.type === 'gesturestart') {
-    lastGestureX = event.screenX;
-    lastGestureY = event.screenY;
-    lastGestureScale = event.scale;
-  }
-
-  if (event.type === 'gesturechange') {
-    tx += event.screenX - lastGestureX;
-    ty += event.screenY - lastGestureY;
-  }
-
-  scale *= 1.0 + (event.scale - lastGestureScale);
-
-  lastGestureX = event.screenX;
-  lastGestureY = event.screenY;
-  lastGestureScale = event.scale;
-
-  console.log(event);
-
-  box.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
-}
-
-document.addEventListener('gesturestart', onGesture);
-document.addEventListener('gesturechange', onGesture);
-document.addEventListener('gestureend', onGesture);
 
 
 // gesturestart

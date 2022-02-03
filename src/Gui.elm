@@ -1,6 +1,7 @@
-module Gui exposing (Gui, Item, disclose, map, singleton, view, with)
+module Gui exposing (Gui, Item, fromEmpty, disclose, map, singleton, view, with)
 
-{-| -}
+{-| 
+@docs Gui, Item, singleton, fromEmpty, disclose, map, view, with-}
 
 import Html exposing (Html, button, details, div, fieldset, form, h1, h2, h3, h5, img, input, label, legend, p, small, span, summary, text)
 import Html.Attributes exposing (checked, class, disabled, for, id, placeholder, src, type_, value)
@@ -13,11 +14,16 @@ import Html.Extra as Html exposing (nothing)
 type Gui msg
     = Gui (List (Item msg))
 
-
 {-| -}
 type alias Item msg =
     { handle : Html msg, scene : Html msg, info : Html msg, control : Html msg }
 
+{-| Create a Gui out of a single Item. Modify the empty Item. -}
+fromEmpty : (Item msg -> Item msg) -> Gui msg
+fromEmpty fu =
+    Item nothing nothing nothing nothing 
+        |> fu
+        |> singleton
 
 {-| `info` is a list of dismissible or disclosable messages (for example toasts),
 `handle` comprises the permanent handles to the object (for example, an avatar plus a login/logout button)

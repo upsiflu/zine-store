@@ -25,38 +25,18 @@ import Json.Encode
 import RemoteData exposing (RemoteData(..))
 import Tile exposing (Tile(..))
 import User exposing (User)
+import Gesture exposing (Gesture, Delta)
 
 
 
-{-
-   ---- Outgoing
-   port signIn : () -> Cmd msg
-   port signOut : () -> Cmd msg
-   port saveNote : Json.Encode.Value -> Cmd msg
-
-
-   ---- Incoming
-   port receiveNote : (Json.Encode.Value -> msg) -> Sub msg
-   port noteError : (Json.Encode.Value -> msg) -> Sub msg
-
-   port signInSuccess : (Json.Encode.Value -> msg) -> Sub msg
-   port signInError : (Json.Encode.Value -> msg) -> Sub msg
-   port receiveNull : (Json.Encode.Value -> msg) -> Sub msg
-   port receiveDelta : (Json.Encode.Value -> msg) -> Sub msg
--}
 ---- MODEL ----
-
-
-{-| relative transformation of a tile
--}
-type alias Delta =
-    { x : Int, y : Int, scalePercentage : Int }
 
 
 {-| -}
 type alias Model =
     { user : User
     , tile : Tile
+    , gesture : Gesture Msg
     }
 
 
@@ -72,36 +52,13 @@ init =
     in
     ( { user = User.init
       , tile = initialTile initialPosition
+      , gesture = Gesture.init { onError = Gesture.errorToString >> Trace, onGesture = DeltaReceived }
       }
     , Cmd.none
     )
 
 
-{-| -}
-deltaDecoder : Json.Decode.Decoder Delta
-deltaDecoder =
-    Json.Decode.succeed Delta
-        |> Json.Decode.Pipeline.required "x" Json.Decode.int
-        |> Json.Decode.Pipeline.required "y" Json.Decode.int
-        |> Json.Decode.Pipeline.required "scalePercentage" Json.Decode.int
 
-
-
-{-
-   messageEncoder : Model -> Json.Encode.Value
-   messageEncoder model =
-       Json.Encode.object
-           [ ( "content", Json.Encode.string model.inputContent )
-           , ( "uid"
-             , case model.userData of
-                   Authenticated {user} ->
-                       Json.Encode.string user.uid
-
-                   _ ->
-                       Json.Encode.null
-             )
-           ]
--}
 ---- UPDATE ----
 
 
@@ -109,7 +66,8 @@ deltaDecoder =
 type Msg
     = UserMessage User.Msg
     | TileMessage Tile.Msg
-    | DeltaReceived (Result Json.Decode.Error Delta)
+    | DeltaReceived Delta
+    | Trace String
 
 
 {-| -}
@@ -122,13 +80,11 @@ update msg model =
         TileMessage message ->
             ( { model | tile = Tile.update message model.tile }, Cmd.none )
 
-        DeltaReceived result ->
-            case result of
-                Ok delta ->
-                    ( { model | tile = Tile.reposition delta model.tile }, Cmd.none )
-
-                Err decodeError ->
-                    ( model, Cmd.none )
+        DeltaReceived delta ->
+            ( { model | tile = Tile.reposition delta model.tile }, Cmd.none )
+        
+        Trace string ->
+            Debug.log string |> \_-> (model, Cmd.none)
 
 
 
@@ -139,14 +95,18 @@ update msg model =
 view : Model -> Html Msg
 view model =
     let
+        gestureGui =
+            Gesture.view model.gesture
+
         userGui =
             User.view model.user |> Gui.map UserMessage
 
         tileGui =
             Tile.view model.tile |> Gui.map TileMessage
     in
-    userGui
-        |> Gui.with tileGui
+    tileGui
+        |> Gui.with gestureGui
+        --|> Gui.with userGui
         |> Gui.view
 
 

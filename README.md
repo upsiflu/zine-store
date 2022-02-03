@@ -1,6 +1,8 @@
 # Zine-Store
 
-**Scope: Implementing a provisory firestore backend to prototype the [zine, an app for creating and infinite collages of editable hypertext blocks](https://github.com/upsiflu/zine).** In the long run, _the firestore will be replaced by a p2p backend_. Check [nextgraph](http://nextgraph.org/) and [P2PKB](https://drive.allmende.io/code/#/3/code/view/0082f96ab016f40545f0ed9dd31169e6/) for an emerging solution from TG, Nico and Jon.
+**Implementing a provisory firestore backend to prototype the [zine, an app for creating and infinite collages of editable hypertext blocks](https://github.com/upsiflu/zine).** Very soon, _the firestore will be replaced by a p2p backend_. Check [P2PKB](https://drive.allmende.io/code/#/3/code/view/0082f96ab016f40545f0ed9dd31169e6/) for a backen'd primer.
+
+**And check out [our DESIGN document](./DESIGN.md) for context, applications, and scope!**
 
 <section style="background:rgba(0,180,160,.3); padding: 1.5rem 1em; margin: 2rem -1em;">
 
@@ -155,10 +157,10 @@ _Note to self:_ This should align better with automerge.
 
 * This is a fork from [Julien Lengrand-Lambert](https://twitter.com/jlengrand)'s beautiful firestore+[Elm 0.19](https://elm-lang.org)+parcel [template](https://github.com/jlengrand/elm-firebase), as [announced here](https://lengrand.fr/using-firebase-in-elm/).
 
-* `zine` is a collaboration with [Jon](https://github.com/almereyda) since fall 2021. Currently we are working in the frame of [nextgraph](team.nextgraph.org).
+* `zine` is a collaboration with [Jon](https://github.com/almereyda) since fall 2021.
 
 
 
 -------
 
-<section style="text-align:center; background:rgba(128,128,128,.3); padding: 7rem 0; margin: -2rem 0;">💖 Have a lot of fun 💖</section>
+<section style="text-align:center; background:rgba(128,128,128,.3); padding: 7rem 0; margin: -1rem;">💖 Have a lot of fun! 💖</section>

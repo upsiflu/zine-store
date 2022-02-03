@@ -1,7 +1,7 @@
 module Tile exposing
     ( Tile(..), Instance(..), Msg
     , Action
-    , reposition, Delta
+    , reposition
     , update
     , view
     )
@@ -10,7 +10,7 @@ module Tile exposing
 
 @docs Tile, Instance, Msg
 @docs Action
-@docs reposition, Delta
+@docs reposition
 @docs update
 @docs view
 
@@ -21,6 +21,7 @@ import Html exposing (Html, button, div, form, h1, h2, h3, h5, img, input, p, sm
 import Html.Attributes exposing (disabled, id, placeholder, src, style, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Html.Extra as Html
+import Gesture exposing (Delta)
 
 
 {-| -}
@@ -52,12 +53,6 @@ type alias Position =
     { x : Int, y : Int, scalePercentage : Int }
 
 
-{-| Cumulative change of `Position`
--}
-type alias Delta =
-    Position
-
-
 {-| -}
 update : Msg -> Tile -> Tile
 update msg tile =
@@ -74,12 +69,16 @@ reposition delta (Tile instance position) =
             , y = position.y + delta.y
             , scalePercentage = (position.scalePercentage * delta.scalePercentage) // 100
         }
+        |> Debug.log "Repositioning Tile"
 
 
 {-| -}
 view : Tile -> Gui msg
 view (Tile instance position) =
     let
+        px = 
+            String.fromInt >> (\n -> n ++ "px")
+            
         diameter =
             px (position.scalePercentage * 1)
 
@@ -93,18 +92,12 @@ view (Tile instance position) =
         , style "position" "relative"
         , style "width" diameter
         , style "height" diameter
-        , id "box"
+        , id "tile"
         ]
         [ text "" ]
-        |> (\box ->
-                Gui.singleton { handle = Html.nothing, scene = box, info = Html.nothing, control = Html.nothing }
+        |> (\tile ->
+                Gui.singleton { handle = Html.nothing, scene = tile, info = Html.nothing, control = Html.nothing }
            )
 
 
 
----- Helpers
-
-
-px : Int -> String
-px =
-    String.fromInt >> (\n -> n ++ "px")

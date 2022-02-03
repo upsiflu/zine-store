@@ -5,6 +5,7 @@
     "exposed-modules": [
         "Main",
         "User",
-        "Tile"
+        "Tile",
+        "Gui"
     ]
 }
