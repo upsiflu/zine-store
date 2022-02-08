@@ -22,6 +22,7 @@ Users can create and edit "Scraps", positioned blocks of hypermedia, on an infin
 4. A block is usually short, so just storing the history of edits is sufficient, we don't need the backend to store snapshots of rendered hypermedia.
 5. If a block is too long, the frontend can cut it into pieces.
 6. Old blocks may deteriorate and lose memory. They become ruins, ghastly ghosts of their former selves. Only a proper restauration can save them from obliviation.
+7. In the case someone posts an iframe, we could also just store the URL and then hotlink, without creating our own copy of the stuff. And we could use the wayback machine to preserve iframes after their vanishing.
 
 **ID**: Blocks can be uniquely addressed via a hash of their content, or through an immutable random id plus an index that stores a mutable content-hash.
 
@@ -73,7 +74,12 @@ Users can create and edit "Scraps", positioned blocks of hypermedia, on an infin
 
 **Mutation**: Avatar changes through time and needs to be synced across sessions. When a user goes offline, the avatar gets dormant and sleeps. In addition, preferences will occasionally change. CRDT would be cool (in the case of a time-traveling multi-personality octopus user it's necessary).
 
-## Layer five: The Gossip-Bots!
+## Layer five: Media files
+
+Often-accessed media that is referenced from any of the Hypertext Blocks should be cached in several resolutions. This could be done by a bot, or by the frontend application itself. These files are immutable of course.
+
+
+## Layer sixhundredsixtysix: The Gossip-Bots!
 
 **Shape**: 
 
@@ -84,6 +90,12 @@ Users can create and edit "Scraps", positioned blocks of hypermedia, on an infin
 **ID**: They are super wicked, so they could pretend to be users or avatars or even scraps?
 
 **Mutation** Severely limited. Although... I'd love to see a Gossip-Bot named Puppetmaster to merge their DNA with an Avatar called Motoko Kusanagi on a Canvas named Shell...
+
+
+## Layer eight and a half: Archive
+
+Nothing lives forever, so we should make sure the Web Archive's Amazing Wayback Machine crawls our site from time to time and persists it for posterity!
+
 
 # Front-End
 
